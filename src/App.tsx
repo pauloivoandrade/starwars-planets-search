@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import useFetchApi from './Hooks/useApi';
+import useFilter from './Hooks/useFilter';
 
 function App() {
   const [filter, setFilter] = useState('');
-  const { fetchData, loading, apiData } = useFetchApi('https://swapi.dev/api/planets');
+  const [selectedColumn, setSelectedColumn] = useState('population');
+  const [selectedOperator, setSelectedOperator] = useState('maior_que');
+  const [inputValue, setInputValue] = useState('0');
+  const { loading, apiData } = useFetchApi('https://swapi.dev/api/planets');
+  const { filteredData } = useFilter(
+    selectedColumn,
+    selectedOperator,
+    parseFloat(inputValue),
+  );
+  const [dataShow, setDataShow] = useState();
 
-  function handleSearch(e) {
-    const filterValue = e.target.value;
-    setFilter(filterValue);
-  }
-
-  const filteredPlanets = apiData.results && apiData.results
-    .filter((planet) => planet.name.includes(filter))
-    .map((planet, index) => (
+  const initialValue = apiData.results && apiData.results
+    .map((planet: any, index: number) => (
       <tr key={ index }>
         <td>{planet.name}</td>
         <td>{planet.rotation_period}</td>
@@ -31,9 +35,94 @@ function App() {
       </tr>
     ));
 
+  const filtereSelect = filteredData && filteredData.map((planet, index) => (
+    <tr key={ index }>
+      <td>{planet.name}</td>
+      <td>{planet.rotation_period}</td>
+      <td>{planet.orbital_period}</td>
+      <td>{planet.diameter}</td>
+      <td>{planet.climate}</td>
+      <td>{planet.gravity}</td>
+      <td>{planet.terrain}</td>
+      <td>{planet.surface_water}</td>
+      <td>{planet.population}</td>
+      <td>{planet.films}</td>
+      <td>{planet.created}</td>
+      <td>{planet.edited}</td>
+      <td>{planet.url}</td>
+    </tr>
+  ));
+
+  useEffect(() => {
+    if (apiData.results) {
+      setDataShow(initialValue);
+    }
+  }, [apiData.results]);
+
+  function handleSearch(e: any) {
+    const filterValue = e.target.value;
+    setFilter(filterValue);
+    const filterDataInput = apiData.results && apiData.results
+      .filter((planet: any) => planet.name.includes(filterValue))
+      .map((planet: any, index: number) => (
+        <tr key={ index }>
+          <td>{planet.name}</td>
+          <td>{planet.rotation_period}</td>
+          <td>{planet.orbital_period}</td>
+          <td>{planet.diameter}</td>
+          <td>{planet.climate}</td>
+          <td>{planet.gravity}</td>
+          <td>{planet.terrain}</td>
+          <td>{planet.surface_water}</td>
+          <td>{planet.population}</td>
+          <td>{planet.films}</td>
+          <td>{planet.created}</td>
+          <td>{planet.edited}</td>
+          <td>{planet.url}</td>
+        </tr>
+      ));
+    setDataShow(filterDataInput);
+  }
+  // const data =
+  function handleDetailSearch() {
+    setDataShow(filtereSelect);
+  }
+
+  function handleSearchColumn(e: any) {
+    const columnValue = e.target.value;
+    setSelectedColumn(columnValue);
+    console.log(columnValue);
+  }
+
+  function handleSearchOperator(e: any) {
+    const operatorValue = e.target.value;
+    let newOperator = '';
+
+    switch (operatorValue) {
+      case 'maior que':
+        newOperator = 'maior_que';
+        break;
+      case 'menor que':
+        newOperator = 'menor_que';
+        break;
+      default:
+        newOperator = 'igual';
+        break;
+    }
+
+    setSelectedOperator(newOperator);
+  }
+
   if (loading) {
     return <h2>LOADING...</h2>;
   }
+  const operators = {
+    maior_que: '>',
+    menor_que: '<',
+    igual: '===',
+  };
+
+  console.log(dataShow);
 
   return (
     <div>
@@ -41,22 +130,46 @@ function App() {
         type="text"
         value={ filter }
         data-testid="name-filter"
-        onChange={ (e) => handleSearch(e) }
+        onChange={ handleSearch }
       />
-      {/* {apiData.results?.map((result, index) => (
-        <div key={ index }>
-          {Object.keys(result).map((key) => (
-            <div key={ key }>
-              <strong>
-                { key }
-                :
-              </strong>
-              {' '}
-              { result[key] }
-            </div>
-          ))}
-        </div>
-      ))} */}
+      Coluna
+      <select
+        name=""
+        // value={ selectedColumn }
+        id="coluna"
+        data-testid="column-filter"
+        onChange={ handleSearchColumn }
+      >
+        <option label="population" value="population">population</option>
+        <option label="orbital_period" value="orbital_period">orbital_period</option>
+        <option label="diameter" value="diameter">diameter</option>
+        <option label="rotation_period" value="rotation_period">rotation_period</option>
+        <option label="surface_water" value="surface_water">surface_water</option>
+      </select>
+      Operador
+      <select
+        // value={  }
+        onChange={ handleSearchOperator }
+        name=""
+        id="operador"
+        data-testid="comparison-filter"
+      >
+        <option label="maior que" value="maior que">maior que</option>
+        <option label="menor que" value="menor que">menor que</option>
+        <option label="igual a" value="igual a">igual a</option>
+      </select>
+      <input
+        type="number"
+        value={ inputValue }
+        onChange={ (e) => setInputValue(e.target.value) }
+        data-testid="value-filter"
+      />
+      <button
+        onClick={ handleDetailSearch }
+        data-testid="button-filter"
+      >
+        FILTRAR
+      </button>
       <table>
         <thead>
           <tr>
@@ -76,7 +189,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          { filteredPlanets}
+          {dataShow}
         </tbody>
       </table>
 

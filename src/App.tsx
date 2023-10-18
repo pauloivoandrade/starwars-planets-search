@@ -8,13 +8,15 @@ function App() {
   const [selectedColumn, setSelectedColumn] = useState('population');
   const [selectedOperator, setSelectedOperator] = useState('maior_que');
   const [inputValue, setInputValue] = useState('0');
-  const { loading, apiData } = useFetchApi('https://swapi.dev/api/planets');
+  const { loading, apiData } = useFetchApi();
+  const [dataShow, setDataShow] = useState();
+  const [combinedFilters, setCombinedFilters] = useState([]);
   const { filteredData } = useFilter(
     selectedColumn,
     selectedOperator,
     parseFloat(inputValue),
+    combinedFilters,
   );
-  const [dataShow, setDataShow] = useState();
 
   const initialValue = apiData.results && apiData.results
     .map((planet: any, index: number) => (
@@ -86,6 +88,7 @@ function App() {
   // const data =
   function handleDetailSearch() {
     setDataShow(filtereSelect);
+    handleCombineFilters();
   }
 
   function handleSearchColumn(e: any) {
@@ -117,12 +120,21 @@ function App() {
     return <h2>LOADING...</h2>;
   }
   const operators = {
-    maior_que: '>',
-    menor_que: '<',
-    igual: '===',
+    maior_que: 'maior que',
+    menor_que: 'menor que',
+    igual: 'igual a',
   };
 
-  console.log(dataShow);
+  function handleCombineFilters() {
+    const newFilter = {
+      coluna: selectedColumn,
+      operador: selectedOperator,
+      valor: inputValue,
+    };
+
+    setCombinedFilters((prevCombinedFilters) => [...prevCombinedFilters, newFilter]);
+  }
+  console.log(combinedFilters);
 
   return (
     <div>
@@ -170,6 +182,17 @@ function App() {
       >
         FILTRAR
       </button>
+      <div>
+        {combinedFilters.map((filtro, index) => (
+          <p key={ index }>
+            {filtro.coluna}
+            {' '}
+            {operators[filtro.operador]}
+            {' '}
+            {filtro.valor}
+          </p>
+        ))}
+      </div>
       <table>
         <thead>
           <tr>

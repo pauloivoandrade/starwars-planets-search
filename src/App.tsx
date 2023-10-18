@@ -18,6 +18,13 @@ function App() {
     combinedFilters,
   );
 
+  const [selectColumn, setSelectColumn] = useState([
+    'population',
+    'orbital_period',
+    'diameter',
+    'rotation_period',
+    'surface_water']);
+
   const initialValue = apiData.results && apiData.results
     .map((planet: any, index: number) => (
       <tr key={ index }>
@@ -55,13 +62,13 @@ function App() {
     </tr>
   ));
 
-  useEffect(() => {
+  useEffect(() => { // nao vou precisar
     if (apiData.results) {
       setDataShow(initialValue);
     }
-  }, [apiData.results, initialValue]);
+  }, [apiData.results]);
 
-  function handleSearch(e: any) {
+  function handleSearch(e: any) { // usar no primeiro input
     const filterValue = e.target.value;
     setFilter(filterValue);
     const filterDataInput = apiData.results && apiData.results
@@ -86,7 +93,7 @@ function App() {
     setDataShow(filterDataInput);
   }
   // const data =
-  function handleDetailSearch() {
+  function handleDetailSearch() { // usar no onclick
     setDataShow(filtereSelect);
     handleCombineFilters();
   }
@@ -132,7 +139,22 @@ function App() {
       valor: inputValue,
     };
 
-    setCombinedFilters((prevCombinedFilters) => [...prevCombinedFilters, newFilter]);
+    const isColumnAlreadyIncluded = combinedFilters
+      .some((filtro) => filtro.coluna === newFilter.coluna);
+
+    if (!isColumnAlreadyIncluded) {
+      // Crie uma cópia da lista original de colunas
+      const updatedColumns = [...selectColumn];
+      // Encontre o índice da coluna selecionada
+      const columnIndex = updatedColumns.indexOf(selectedColumn);
+      // Remova a coluna selecionada da lista
+      updatedColumns.splice(columnIndex, 1);
+      // Atualize o estado com a nova lista de colunas
+      setSelectColumn(updatedColumns);
+
+      // Adicione o novo filtro aos filtros combinados
+      setCombinedFilters((prevCombinedFilters) => [...prevCombinedFilters, newFilter]);
+    }
   }
   console.log(combinedFilters);
 
@@ -152,11 +174,11 @@ function App() {
         data-testid="column-filter"
         onChange={ handleSearchColumn }
       >
-        <option label="population" value="population">population</option>
-        <option label="orbital_period" value="orbital_period">orbital_period</option>
-        <option label="diameter" value="diameter">diameter</option>
-        <option label="rotation_period" value="rotation_period">rotation_period</option>
-        <option label="surface_water" value="surface_water">surface_water</option>
+        {selectColumn.map((column, index) => {
+          return (
+            <option key={ index }>{column}</option>
+          );
+        })}
       </select>
       Operador
       <select

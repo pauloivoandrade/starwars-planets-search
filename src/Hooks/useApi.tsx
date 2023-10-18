@@ -16,7 +16,7 @@ export default function useFetchApi() {
   useEffect(() => {
     fetchData();
   }, []);
-console.log(apiData);
+  console.log(apiData);
 
   return {
     fetchData,

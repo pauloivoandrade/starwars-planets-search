@@ -59,7 +59,7 @@ function App() {
     if (apiData.results) {
       setDataShow(initialValue);
     }
-  }, [apiData.results]);
+  }, [apiData.results, initialValue]);
 
   function handleSearch(e: any) {
     const filterValue = e.target.value;

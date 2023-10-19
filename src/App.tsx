@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import useFetchApi from './Hooks/useApi';
 import useFilter from './Hooks/useFilter';
+import { planetCard } from './components/planetsCard';
 
 function App() {
   const [filter, setFilter] = useState('');
@@ -18,6 +19,8 @@ function App() {
     combinedFilters,
   );
 
+  const [dataShowHistory, setDataShowHistory] = useState([]);
+
   const [selectColumn, setSelectColumn] = useState([
     'population',
     'orbital_period',
@@ -27,46 +30,18 @@ function App() {
 
   const initialValue = apiData.results && apiData.results
     .map((planet: any, index: number) => (
-      <tr key={ index }>
-        <td>{planet.name}</td>
-        <td>{planet.rotation_period}</td>
-        <td>{planet.orbital_period}</td>
-        <td>{planet.diameter}</td>
-        <td>{planet.climate}</td>
-        <td>{planet.gravity}</td>
-        <td>{planet.terrain}</td>
-        <td>{planet.surface_water}</td>
-        <td>{planet.population}</td>
-        <td>{planet.films}</td>
-        <td>{planet.created}</td>
-        <td>{planet.edited}</td>
-        <td>{planet.url}</td>
-      </tr>
+      planetCard(planet, index)
     ));
 
   const filtereSelect = filteredData && filteredData.map((planet, index) => (
-    <tr key={ index }>
-      <td>{planet.name}</td>
-      <td>{planet.rotation_period}</td>
-      <td>{planet.orbital_period}</td>
-      <td>{planet.diameter}</td>
-      <td>{planet.climate}</td>
-      <td>{planet.gravity}</td>
-      <td>{planet.terrain}</td>
-      <td>{planet.surface_water}</td>
-      <td>{planet.population}</td>
-      <td>{planet.films}</td>
-      <td>{planet.created}</td>
-      <td>{planet.edited}</td>
-      <td>{planet.url}</td>
-    </tr>
+    planetCard(planet, index)
   ));
 
   useEffect(() => { // nao vou precisar
     if (apiData.results) {
       setDataShow(initialValue);
     }
-  }, [apiData.results, initialValue]);
+  }, [apiData.results]);
 
   function handleSearch(e: any) { // usar no primeiro input
     const filterValue = e.target.value;
@@ -74,28 +49,23 @@ function App() {
     const filterDataInput = apiData.results && apiData.results
       .filter((planet: any) => planet.name.includes(filterValue))
       .map((planet: any, index: number) => (
-        <tr key={ index }>
-          <td>{planet.name}</td>
-          <td>{planet.rotation_period}</td>
-          <td>{planet.orbital_period}</td>
-          <td>{planet.diameter}</td>
-          <td>{planet.climate}</td>
-          <td>{planet.gravity}</td>
-          <td>{planet.terrain}</td>
-          <td>{planet.surface_water}</td>
-          <td>{planet.population}</td>
-          <td>{planet.films}</td>
-          <td>{planet.created}</td>
-          <td>{planet.edited}</td>
-          <td>{planet.url}</td>
-        </tr>
+        planetCard(planet, index)
       ));
     setDataShow(filterDataInput);
   }
   // const data =
-  function handleDetailSearch() { // usar no onclick
+  function handleDetailSearch() {
     setDataShow(filtereSelect);
     handleCombineFilters();
+    const filteredPlanets = filteredData.map((planet: any, index: number) => (
+      planetCard(planet, index)
+    ));
+
+    // Adicione o estado atual de dataShow ao histórico
+    setDataShowHistory((prev) => [...prev, dataShow]);
+
+    // Atualize dataShow com os novos dados filtrados
+    setDataShow(filteredPlanets);
   }
 
   function handleSearchColumn(e: any) {
@@ -156,7 +126,23 @@ function App() {
       setCombinedFilters((prevCombinedFilters) => [...prevCombinedFilters, newFilter]);
     }
   }
-  console.log(combinedFilters);
+  function handleExcludeFilter(indexToRemove: number) {
+    const updatedFilters = [...combinedFilters];
+    updatedFilters.splice(indexToRemove, 1);
+    setCombinedFilters(updatedFilters);
+
+    // Restaurar dataShow para o estado anterior
+    const previousDataShow = dataShowHistory[dataShowHistory.length - 1];
+    setDataShowHistory((prev) => prev.slice(0, -1)); // Remover o último estado do histórico
+
+    // Se ainda houver filtros, atualize dataShow com o estado anterior, caso contrário, use initialValue
+    const newDataShow = updatedFilters.length > 0 ? previousDataShow : initialValue;
+    setDataShow(newDataShow);
+  }
+  function handleExcludeAllFilters() {
+    setCombinedFilters([]);
+    setDataShow(initialValue);
+  }
 
   return (
     <div>
@@ -204,14 +190,31 @@ function App() {
       >
         FILTRAR
       </button>
+      <button
+        data-testid="button-remove-filters"
+        onClick={ handleExcludeAllFilters }
+      >
+        REMOVER FILTROS
+
+      </button>
       <div>
         {combinedFilters.map((filtro, index) => (
           <p key={ index }>
             {filtro.coluna}
             {' '}
+            {' '}
             {operators[filtro.operador]}
             {' '}
+            {' '}
             {filtro.valor}
+            <p data-testid="filter">
+              <button
+                onClick={ () => handleExcludeFilter(index) }
+              >
+                X
+
+              </button>
+            </p>
           </p>
         ))}
       </div>

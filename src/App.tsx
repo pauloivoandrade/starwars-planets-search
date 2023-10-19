@@ -3,6 +3,8 @@ import './App.css';
 import useFetchApi from './Hooks/useApi';
 import useFilter from './Hooks/useFilter';
 import { planetCard } from './components/planetsCard';
+import { Table } from './Table';
+import OrderData from './components/OrderData';
 
 function App() {
   const [initialized, setInitialized] = useState(false);
@@ -55,7 +57,6 @@ function App() {
       ));
     setDataShow(filterDataInput);
   }
-  // const data =
   function handleDetailSearch() {
     setDataShow(filtereSelect);
     handleCombineFilters();
@@ -63,10 +64,8 @@ function App() {
       planetCard(planet, index)
     ));
 
-    // Adicione o estado atual de dataShow ao histórico
     setDataShowHistory((prev) => [...prev, dataShow]);
 
-    // Atualize dataShow com os novos dados filtrados
     setDataShow(filteredPlanets);
   }
 
@@ -115,16 +114,11 @@ function App() {
       .some((filtro) => filtro.coluna === newFilter.coluna);
 
     if (!isColumnAlreadyIncluded) {
-      // Crie uma cópia da lista original de colunas
       const updatedColumns = [...selectColumn];
-      // Encontre o índice da coluna selecionada
       const columnIndex = updatedColumns.indexOf(selectedColumn);
-      // Remova a coluna selecionada da lista
       updatedColumns.splice(columnIndex, 1);
-      // Atualize o estado com a nova lista de colunas
       setSelectColumn(updatedColumns);
 
-      // Adicione o novo filtro aos filtros combinados
       setCombinedFilters((prevCombinedFilters) => [...prevCombinedFilters, newFilter]);
     }
   }
@@ -133,11 +127,9 @@ function App() {
     updatedFilters.splice(indexToRemove, 1);
     setCombinedFilters(updatedFilters);
 
-    // Restaurar dataShow para o estado anterior
     const previousDataShow = dataShowHistory[dataShowHistory.length - 1];
     setDataShowHistory((prev) => prev.slice(0, -1)); // Remover o último estado do histórico
 
-    // Se ainda houver filtros, atualize dataShow com o estado anterior, caso contrário, use initialValue
     const newDataShow = updatedFilters.length > 0 ? previousDataShow : initialValue;
     setDataShow(newDataShow);
   }
@@ -220,28 +212,8 @@ function App() {
           </p>
         ))}
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Rotation Period</th>
-            <th>Orbital Period</th>
-            <th>Diameter</th>
-            <th>Climate</th>
-            <th>Gravity</th>
-            <th>Terrain</th>
-            <th>Surface Water</th>
-            <th>Population</th>
-            <th>films</th>
-            <th>created</th>
-            <th>edited</th>
-            <th>url</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataShow}
-        </tbody>
-      </table>
+      <OrderData updateDataShow={ setDataShow } />
+      <Table dataShow={dataShow} updateDataShow={setDataShow} />
 
     </div>
   );

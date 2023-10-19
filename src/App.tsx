@@ -213,7 +213,7 @@ function App() {
         ))}
       </div>
       <OrderData updateDataShow={ setDataShow } />
-      <Table dataShow={dataShow} updateDataShow={setDataShow} />
+      <Table dataShow={ dataShow } updateDataShow={ setDataShow } />
 
     </div>
   );

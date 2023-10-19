@@ -23,19 +23,24 @@ function useOrderData() {
         const rawValueA = a[column];
         const rawValueB = b[column];
 
-        const valueA = Number.isNaN(rawValueA) ? rawValueA : parseFloat(rawValueA);
-        const valueB = Number.isNaN(rawValueB) ? rawValueB : parseFloat(rawValueB);
+        const valueA = isNaN(rawValueA) ? rawValueA : parseFloat(rawValueA);
+        const valueB = isNaN(rawValueB) ? rawValueB : parseFloat(rawValueB);
 
+        // Lidar com valores "unknown"
         if (valueA === 'unknown' && valueB === 'unknown') {
+          // Ambos são "unknown", eles são considerados iguais
           return 0;
         }
         if (valueA === 'unknown') {
+          // A é "unknown", deve ser classificado por último
           return 1;
         }
         if (valueB === 'unknown') {
+          // B é "unknown", deve ser classificado por último
           return -1;
         }
 
+        // Comparar os valores numéricos ou alfabéticos
         if (valueA < valueB) {
           return selectedOption === 'ASC' ? -1 : 1; // Troque -1 e 1 para ASC
         }

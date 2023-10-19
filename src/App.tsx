@@ -5,6 +5,7 @@ import useFilter from './Hooks/useFilter';
 import { planetCard } from './components/planetsCard';
 
 function App() {
+  const [initialized, setInitialized] = useState(false);
   const [filter, setFilter] = useState('');
   const [selectedColumn, setSelectedColumn] = useState('population');
   const [selectedOperator, setSelectedOperator] = useState('maior_que');
@@ -38,10 +39,11 @@ function App() {
   ));
 
   useEffect(() => { // nao vou precisar
-    if (apiData.results) {
+    if (apiData.results && !initialized) {
       setDataShow(initialValue);
+      setInitialized(true);
     }
-  }, [apiData.results]);
+  }, [apiData.results, initialized, initialValue]);
 
   function handleSearch(e: any) { // usar no primeiro input
     const filterValue = e.target.value;

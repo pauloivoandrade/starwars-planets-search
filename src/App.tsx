@@ -3,7 +3,7 @@ import './App.css';
 import useFetchApi from './Hooks/useApi';
 import useFilter from './Hooks/useFilter';
 import { planetCard } from './components/planetsCard';
-import useOrder from './Hooks/useOrder';
+// import useOrder from './Hooks/useOrder';
 
 function App() {
   const [initialized, setInitialized] = useState(false);
@@ -20,7 +20,7 @@ function App() {
     parseFloat(inputValue),
     combinedFilters,
   );
-  const { sortedData, columnSelected, asc, desc, handleSort } = useOrder(apiData);
+  // const { sortedData, columnSelected, asc, desc, handleSort } = useOrder(apiData);
   const [dataShowHistory, setDataShowHistory] = useState([]);
   const [selectColumn, setSelectColumn] = useState([
     'population',
@@ -183,11 +183,11 @@ function App() {
       </select>
       <div>
         <label>
-          <input type="radio" name="order" value="ascendente" onSelect={ asc } />
+          <input type="radio" name="order" value="ascendente" />
           Ascendente
         </label>
         <label>
-          <input type="radio" name="order" value="descendente" onSelect={ desc } />
+          <input type="radio" name="order" value="descendente" />
           Descendente
         </label>
       </div>

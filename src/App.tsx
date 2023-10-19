@@ -3,6 +3,7 @@ import './App.css';
 import useFetchApi from './Hooks/useApi';
 import useFilter from './Hooks/useFilter';
 import { planetCard } from './components/planetsCard';
+import useOrder from './Hooks/useOrder';
 
 function App() {
   const [initialized, setInitialized] = useState(false);
@@ -19,9 +20,8 @@ function App() {
     parseFloat(inputValue),
     combinedFilters,
   );
-
+  const { sortedData, columnSelected, asc, desc, handleSort } = useOrder(apiData);
   const [dataShowHistory, setDataShowHistory] = useState([]);
-
   const [selectColumn, setSelectColumn] = useState([
     'population',
     'orbital_period',
@@ -38,14 +38,14 @@ function App() {
     planetCard(planet, index)
   ));
 
-  useEffect(() => { // nao vou precisar
+  useEffect(() => {
     if (apiData.results && !initialized) {
       setDataShow(initialValue);
       setInitialized(true);
     }
   }, [apiData.results, initialized, initialValue]);
 
-  function handleSearch(e: any) { // usar no primeiro input
+  function handleSearch(e: any) {
     const filterValue = e.target.value;
     setFilter(filterValue);
     const filterDataInput = apiData.results && apiData.results
@@ -55,7 +55,7 @@ function App() {
       ));
     setDataShow(filterDataInput);
   }
-  // const data =
+
   function handleDetailSearch() {
     setDataShow(filtereSelect);
     handleCombineFilters();
@@ -63,23 +63,17 @@ function App() {
       planetCard(planet, index)
     ));
 
-    // Adicione o estado atual de dataShow ao histórico
     setDataShowHistory((prev) => [...prev, dataShow]);
-
-    // Atualize dataShow com os novos dados filtrados
     setDataShow(filteredPlanets);
   }
-
   function handleSearchColumn(e: any) {
     const columnValue = e.target.value;
     setSelectedColumn(columnValue);
     console.log(columnValue);
   }
-
   function handleSearchOperator(e: any) {
     const operatorValue = e.target.value;
     let newOperator = '';
-
     switch (operatorValue) {
       case 'maior que':
         newOperator = 'maior_que';
@@ -91,10 +85,8 @@ function App() {
         newOperator = 'igual';
         break;
     }
-
     setSelectedOperator(newOperator);
   }
-
   if (loading) {
     return <h2>LOADING...</h2>;
   }
@@ -103,28 +95,19 @@ function App() {
     menor_que: 'menor que',
     igual: 'igual a',
   };
-
   function handleCombineFilters() {
     const newFilter = {
       coluna: selectedColumn,
       operador: selectedOperator,
       valor: inputValue,
     };
-
     const isColumnAlreadyIncluded = combinedFilters
       .some((filtro) => filtro.coluna === newFilter.coluna);
-
     if (!isColumnAlreadyIncluded) {
-      // Crie uma cópia da lista original de colunas
       const updatedColumns = [...selectColumn];
-      // Encontre o índice da coluna selecionada
       const columnIndex = updatedColumns.indexOf(selectedColumn);
-      // Remova a coluna selecionada da lista
       updatedColumns.splice(columnIndex, 1);
-      // Atualize o estado com a nova lista de colunas
       setSelectColumn(updatedColumns);
-
-      // Adicione o novo filtro aos filtros combinados
       setCombinedFilters((prevCombinedFilters) => [...prevCombinedFilters, newFilter]);
     }
   }
@@ -132,12 +115,8 @@ function App() {
     const updatedFilters = [...combinedFilters];
     updatedFilters.splice(indexToRemove, 1);
     setCombinedFilters(updatedFilters);
-
-    // Restaurar dataShow para o estado anterior
     const previousDataShow = dataShowHistory[dataShowHistory.length - 1];
-    setDataShowHistory((prev) => prev.slice(0, -1)); // Remover o último estado do histórico
-
-    // Se ainda houver filtros, atualize dataShow com o estado anterior, caso contrário, use initialValue
+    setDataShowHistory((prev) => prev.slice(0, -1));
     const newDataShow = updatedFilters.length > 0 ? previousDataShow : initialValue;
     setDataShow(newDataShow);
   }
@@ -145,7 +124,6 @@ function App() {
     setCombinedFilters([]);
     setDataShow(initialValue);
   }
-
   return (
     <div>
       <input
@@ -157,7 +135,6 @@ function App() {
       Coluna
       <select
         name=""
-        // value={ selectedColumn }
         id="coluna"
         data-testid="column-filter"
         onChange={ handleSearchColumn }
@@ -170,7 +147,6 @@ function App() {
       </select>
       Operador
       <select
-        // value={  }
         onChange={ handleSearchOperator }
         name=""
         id="operador"
@@ -192,12 +168,34 @@ function App() {
       >
         FILTRAR
       </button>
+      Ordenar
+      <select
+        name=""
+        id="coluna"
+        data-testid="column-filter"
+        onChange={ handleSearchColumn }
+      >
+        {selectColumn.map((column, index) => {
+          return (
+            <option key={ index }>{column}</option>
+          );
+        })}
+      </select>
+      <div>
+        <label>
+          <input type="radio" name="order" value="ascendente" onSelect={ asc } />
+          Ascendente
+        </label>
+        <label>
+          <input type="radio" name="order" value="descendente" onSelect={ desc } />
+          Descendente
+        </label>
+      </div>
       <button
         data-testid="button-remove-filters"
         onClick={ handleExcludeAllFilters }
       >
         REMOVER FILTROS
-
       </button>
       <div>
         {combinedFilters.map((filtro, index) => (
@@ -214,7 +212,6 @@ function App() {
                 onClick={ () => handleExcludeFilter(index) }
               >
                 X
-
               </button>
             </p>
           </p>

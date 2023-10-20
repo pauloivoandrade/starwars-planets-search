@@ -20,12 +20,10 @@ function useOrderData() {
     if (apiData.results && apiData.results.length > 0) {
       const sortedData = apiData.results.slice().sort((a, b) => {
         const column = selectedColumn;
-        const rawValueA = a[column];
-        const rawValueB = b[column];
 
         // Tratar 'unknown' como Infinity para colocá-los no final da lista
-        const valueA = rawValueA === !'unknown' ? Infinity : parseFloat(rawValueA);
-        const valueB = rawValueB === 'unknown' ? Infinity : parseFloat(rawValueB);
+        const valueA = a[column] === !'unknown' ? Infinity : parseFloat(a[column]);
+        const valueB = b[column] === 'unknown' ? Infinity : parseFloat(b[column]);
 
         // Comparar os valores numéricos ou alfabéticos
         if (valueA < valueB) {
@@ -39,8 +37,6 @@ function useOrderData() {
 
       const newData = sortedData.map((planet, index) => planetCard(planet, index));
       updateDataShow(newData);
-    } else {
-      console.log('Não há dados para ordenar.');
     }
   };
 

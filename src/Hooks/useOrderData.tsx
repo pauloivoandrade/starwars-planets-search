@@ -16,24 +16,24 @@ function useOrderData() {
     setSelectedOption(option);
   };
 
+  const parameters = (a, b) => {
+    const column = selectedColumn;
+
+    const valueA = a[column] === !'unknown' ? Infinity : parseFloat(a[column]);
+    const valueB = b[column] === 'unknown' ? Infinity : parseFloat(b[column]);
+
+    if (valueA < valueB) {
+      return selectedOption === 'ASC' ? -1 : 1;
+    }
+    if (valueA > valueB) {
+      return selectedOption === 'ASC' ? 1 : -1;
+    }
+    return 0;
+  };
+
   const handleOrder = (updateDataShow) => {
     if (apiData.results && apiData.results.length > 0) {
-      const sortedData = apiData.results.slice().sort((a, b) => {
-        const column = selectedColumn;
-
-        // Tratar 'unknown' como Infinity para colocá-los no final da lista
-        const valueA = a[column] === !'unknown' ? Infinity : parseFloat(a[column]);
-        const valueB = b[column] === 'unknown' ? Infinity : parseFloat(b[column]);
-
-        // Comparar os valores numéricos ou alfabéticos
-        if (valueA < valueB) {
-          return selectedOption === 'ASC' ? -1 : 1;
-        }
-        if (valueA > valueB) {
-          return selectedOption === 'ASC' ? 1 : -1;
-        }
-        return 0;
-      });
+      const sortedData = apiData.results.slice().sort(parameters);
 
       const newData = sortedData.map((planet, index) => planetCard(planet, index));
       updateDataShow(newData);

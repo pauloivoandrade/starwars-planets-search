@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { useFetchIngredientsData } from './seuArquivoComOHook';
 
 export default function useFetchApi() {
   const [loading, setLoading] = useState(false);
@@ -22,4 +24,26 @@ export default function useFetchApi() {
     loading,
     apiData,
   };
+} // Substitua com o caminho correto para o seu arquivo
+
+function MeuComponente() {
+  const [ingrediente, setIngrediente] = useState(''); // Estado para armazenar o valor do input
+  const { apiIngredients } = useFetchIngredientsData(ingrediente);
+
+  const handleInputChange = (event) => {
+    setIngrediente(event.target.value); // Atualiza o estado com o valor do input
+  };
+
+  // Restante do seu componente com um input controlado
+  return (
+    <div>
+      <input
+        type="text"
+        value={ ingrediente }
+        onChange={ handleInputChange }
+        placeholder="Digite o ingrediente"
+      />
+      {/* Renderiza os dados do API conforme necessário */}
+    </div>
+  );
 }
